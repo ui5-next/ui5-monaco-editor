@@ -60,8 +60,7 @@ export default class MonacoEditor extends Control {
     events: {
       liveChange: {},
       change: {}
-    },
-    defaultProperty: "content"
+    }
   }
 
   init() {
@@ -109,7 +108,8 @@ export default class MonacoEditor extends Control {
         value: this.getValue(),
         language: this.getType(),
         readOnly: !this.getEditable(),
-        automaticLayout: true
+        automaticLayout: true,
+        minimap: { enabled: false } // disable minimap to increase performance
       });
 
       this._oEditor.getModel().onDidChangeContent(this._onEditorValueChange.bind(this));
@@ -124,11 +124,13 @@ export default class MonacoEditor extends Control {
   _onBlur() {
     var sEditorValue = this._oEditor.getValue();
     var sCurrentValue = this.getValue();
-    this.setProperty("value", sEditorValue, true);
-    this.fireChange({
-      value: sEditorValue,
-      oldValue: sCurrentValue
-    });
+    if(sEditorValue != sCurrentValue){
+      this.setProperty("value", sEditorValue, true);
+      this.fireChange({
+        value: sEditorValue,
+        oldValue: sCurrentValue
+      });
+    }
   }
 
   _onEditorValueChange(e) {
@@ -138,11 +140,16 @@ export default class MonacoEditor extends Control {
     }
 
     var sValue = this._oEditor.getValue();
+    var sCurrentValue = this.getValue();
 
-    this.fireLiveChange({
-      value: sValue,
-      editorEvent: e
-    });
+    if(sValue != sCurrentValue){
+      this.setProperty("value", sValue, true);
+
+      this.fireLiveChange({
+        value: sValue,
+        editorEvent: e
+      });
+    }
 
   }
 
@@ -185,6 +192,12 @@ export default class MonacoEditor extends Control {
     oRm.writeClasses();
     oRm.write(">");
     oRm.write("</div>");
+  }
+
+  exit() {
+    jQuery(this._oEditorDomRef).remove();
+    this._oEditorDomRef = null;
+    this._oEditor = null;
   }
 
 }

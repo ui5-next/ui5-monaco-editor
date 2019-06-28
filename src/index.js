@@ -1,23 +1,16 @@
 import MonacoEditor from "./control/MonacoEditor";
 import App from "sap/m/App";
 import Page from "sap/m/Page";
-import JSONModel from "sap/ui/model/json/JSONModel";
 
-var src = `
-"use strict";
+var value = `"use strict";
 
-class Chuck {
-    greet() {
+class Chuck \\{
+    greet() \\{
         return Facts.next();
-    }
-}`;
+    \\}
+\\}`;
 
-var model = new JSONModel({
-  src
-});
-
-
-var editor = <MonacoEditor value="{/src}" />;
+var editor = <MonacoEditor value={value} />;
 
 var app = <App
   pages={<Page
@@ -26,4 +19,4 @@ var app = <App
   />}
 />;
 
-app.setModel(model).placeAt("content");
+app.placeAt("content");
