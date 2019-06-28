@@ -85,10 +85,9 @@ export default class MonacoEditor extends Control {
       }
     }.bind(this), 0);
 
-    // load requirejs
-    jQuery.sap.includeScript("https://cdn.bootcss.com/require.js/2.3.6/require.min.js", "requirejs", () => {
+    const setup = () => {
 
-      require.config({ paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.17.0/min/vs' } });
+      window.require.config({ paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.17.0/min/vs' } });
 
       // load monaco editor
       require(['vs/editor/editor.main'], monaco => {
@@ -101,12 +100,32 @@ export default class MonacoEditor extends Control {
 
         this._oEditor.getModel().onDidChangeContent(this._onEditorValueChange.bind(this));
 
+        this._oEditor.onDidBlurEditorText(this._onBlur.bind(this));
+
+
       });
 
-    });
+    };
+
+    if (!window.require) {
+      // load requirejs
+      jQuery.sap.includeScript("https://cdn.bootcss.com/require.js/2.3.6/require.min.js", "requirejs", setup);
+    } else {
+      setup();
+    }
 
     oDomRef.appendChild(this._oEditorDomRef);
 
+  }
+
+  _onBlur(){
+    var sEditorValue = this._oEditor.getValue();
+    var sCurrentValue = this.getValue();
+    this.setProperty("value", sEditorValue, true);
+    this.fireChange({
+      value: sEditorValue,
+      oldValue: sCurrentValue
+    });
   }
 
   _onEditorValueChange(e) {
@@ -115,7 +134,7 @@ export default class MonacoEditor extends Control {
       return;
     }
 
-    var sValue = this.getValue();
+    var sValue = this._oEditor.getValue();
 
     this.fireLiveChange({
       value: sValue,
