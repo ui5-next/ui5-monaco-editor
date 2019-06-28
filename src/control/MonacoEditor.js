@@ -85,40 +85,43 @@ export default class MonacoEditor extends Control {
       }
     }.bind(this), 0);
 
-    const setup = () => {
 
-      window.require.config({ paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.17.0/min/vs' } });
-
-      // load monaco editor
-      require(['vs/editor/editor.main'], monaco => {
-
-        this._oEditor = monaco.editor.create(this._oEditorDomRef, {
-          value: this.getValue(),
-          language: this.getType(),
-          readOnly: !this.getEditable()
-        });
-
-        this._oEditor.getModel().onDidChangeContent(this._onEditorValueChange.bind(this));
-
-        this._oEditor.onDidBlurEditorText(this._onBlur.bind(this));
-
-
-      });
-
-    };
 
     if (!window.require) {
       // load requirejs
-      jQuery.sap.includeScript("https://cdn.bootcss.com/require.js/2.3.6/require.min.js", "requirejs", setup);
+      jQuery.sap.includeScript("https://cdn.bootcss.com/require.js/2.3.6/require.min.js", "requirejs", this._setupEditor.bind(this));
     } else {
-      setup();
+      this._setupEditor.bind(this)();
     }
 
     oDomRef.appendChild(this._oEditorDomRef);
 
   }
 
-  _onBlur(){
+  _setupEditor() {
+
+    window.require.config({ paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.17.0/min/vs' } });
+
+    // load monaco editor
+    require(['vs/editor/editor.main'], monaco => {
+
+      this._oEditor = monaco.editor.create(this._oEditorDomRef, {
+        value: this.getValue(),
+        language: this.getType(),
+        readOnly: !this.getEditable(),
+        automaticLayout: true
+      });
+
+      this._oEditor.getModel().onDidChangeContent(this._onEditorValueChange.bind(this));
+
+      this._oEditor.onDidBlurEditorText(this._onBlur.bind(this));
+
+
+    });
+
+  }
+
+  _onBlur() {
     var sEditorValue = this._oEditor.getValue();
     var sCurrentValue = this.getValue();
     this.setProperty("value", sEditorValue, true);
