@@ -14,9 +14,7 @@
     "build:sourcemap": "node_modules/.bin/gulp build:sourcemap",
     "lint:fix": "node_modules/.bin/eslint --fix \"src/**/*.js\""
   },
-  "dependencies": {
-    "lodash": "^4.17.11"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/openui5": "^1.40.1",
     "@ui5-next/types": "latest",

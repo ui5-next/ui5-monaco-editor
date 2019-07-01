@@ -8,15 +8,19 @@ class Chuck \\{
     greet() \\{
         return Facts.next();
     \\}
-\\}`;
+\\}
+
+`;
 
 var editor = <MonacoEditor value={value} />;
 
 var app = <App
-  pages={<Page
-    title="MonacoEditor Demo"
-    content={editor}
-  />}
+  pages={
+    <Page
+      title="MonacoEditor Demo"
+      content={editor}
+    />
+  }
 />;
 
 app.placeAt("content");

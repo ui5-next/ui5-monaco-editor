@@ -1,6 +1,4 @@
-
 import Control from "sap/ui/core/Control";
-
 
 export default class MonacoEditor extends Control {
 
@@ -16,6 +14,14 @@ export default class MonacoEditor extends Control {
         group: "Appearance",
         defaultValue: "javascript"
       },
+      types: {
+        type: "any",
+        defaultValue: [
+          "https://raw.githubusercontent.com/larshp/xsjs.d.ts/master/xsjs.d.ts",
+          "https://raw.githubusercontent.com/SAP/ui5-typescript/master/packages/ts-types/types/sap.ui.core.d.ts",
+          "https://raw.githubusercontent.com/SAP/ui5-typescript/master/packages/ts-types/types/sap.m.d.ts"
+        ]
+      },
       width: {
         type: "sap.ui.core.CSSSize",
         group: "Appearance",
@@ -25,6 +31,10 @@ export default class MonacoEditor extends Control {
         type: "sap.ui.core.CSSSize",
         group: "Appearance",
         defaultValue: "100%"
+      },
+      fontSize: {
+        type: "float",
+        defaultValue: 14
       },
       editable: {
         type: "boolean",
@@ -78,13 +88,14 @@ export default class MonacoEditor extends Control {
       oPropertyDefaults = this.getMetadata().getPropertyDefaults();
 
     setTimeout(function() {
-      if (this.getMaxLines() === oPropertyDefaults.maxLines && this.getHeight() === oPropertyDefaults.height
-        && oDomRef.height < 20) {
+      if (
+        this.getMaxLines() === oPropertyDefaults.maxLines
+        && this.getHeight() === oPropertyDefaults.height
+        && oDomRef.height < 20
+      ) {
         oDomRef.style.height = "3rem";
       }
     }.bind(this), 0);
-
-
 
     if (!window.require) {
       // load requirejs
@@ -108,6 +119,7 @@ export default class MonacoEditor extends Control {
         value: this.getValue(),
         language: this.getType(),
         readOnly: !this.getEditable(),
+        fontSize: this.getFontSize(),
         automaticLayout: true,
         minimap: { enabled: false } // disable minimap to increase performance
       });
@@ -116,6 +128,33 @@ export default class MonacoEditor extends Control {
 
       this._oEditor.onDidBlurEditorText(this._onBlur.bind(this));
 
+      this._loadTypes();
+
+    });
+
+  }
+
+  _loadTypes() {
+
+    require(['vs/editor/editor.main'], monaco => {
+
+      // load types
+      var types = this.getTypes() || [];
+
+      if (types) {
+        Promise.all(
+          types.map(
+            t => fetch(t)
+              .then(
+                res => res.text().then(typeContent => ({ path: t, typeContent: typeContent }))
+              )
+          )
+        ).then(typeContents => {
+          typeContents.forEach(t => {
+            monaco.languages.typescript.javascriptDefaults.addExtraLib(t.typeContent, t.path);
+          });
+        });
+      }
 
     });
 
@@ -124,7 +163,7 @@ export default class MonacoEditor extends Control {
   _onBlur() {
     var sEditorValue = this._oEditor.getValue();
     var sCurrentValue = this.getValue();
-    if(sEditorValue != sCurrentValue){
+    if (sEditorValue != sCurrentValue) {
       this.setProperty("value", sEditorValue, true);
       this.fireChange({
         value: sEditorValue,
@@ -142,7 +181,7 @@ export default class MonacoEditor extends Control {
     var sValue = this._oEditor.getValue();
     var sCurrentValue = this.getValue();
 
-    if(sValue != sCurrentValue){
+    if (sValue != sCurrentValue) {
       this.setProperty("value", sValue, true);
 
       this.fireLiveChange({
