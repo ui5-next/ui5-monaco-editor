@@ -1,4 +1,8 @@
 {
   "compilerOptions": {},
-  "include": ["src","./node_modules/@ui5-next/types/bin/index.d.ts"]
+  "include": [
+    "src",
+    "./node_modules/@ui5-next/types/bin/index.d.ts",
+    "./node_modules/@openui5/ts-types/types/sap.ui.core.d.ts"
+  ]
 }

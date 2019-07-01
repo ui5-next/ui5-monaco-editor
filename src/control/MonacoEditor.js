@@ -1,5 +1,8 @@
 import Control from "sap/ui/core/Control";
 
+/**
+ * MonacoEditor Control
+ */
 export default class MonacoEditor extends Control {
 
   metadata = {
@@ -108,6 +111,9 @@ export default class MonacoEditor extends Control {
 
   }
 
+  /**
+   * setup editor with options
+   */
   _setupEditor() {
 
     window.require.config({ paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.17.0/min/vs' } });
@@ -134,8 +140,12 @@ export default class MonacoEditor extends Control {
 
   }
 
+  /**
+   * load type definitions from remote
+   */
   _loadTypes() {
 
+    // requirejs
     require(['vs/editor/editor.main'], monaco => {
 
       // load types
@@ -145,9 +155,8 @@ export default class MonacoEditor extends Control {
         Promise.all(
           types.map(
             t => fetch(t)
-              .then(
-                res => res.text().then(typeContent => ({ path: t, typeContent: typeContent }))
-              )
+              .then(res => res.text())
+              .then(typeContent => ({ path: t, typeContent: typeContent }))
           )
         ).then(typeContents => {
           typeContents.forEach(t => {

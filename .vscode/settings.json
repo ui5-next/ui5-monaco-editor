@@ -6,6 +6,8 @@
     "editor.wordWrap": "on",
     "files.eol": "\n",
     "cSpell.words": [
-        "codeeditor"
+        "codeeditor",
+        "preload",
+        "sourcemap"
     ]
 }
