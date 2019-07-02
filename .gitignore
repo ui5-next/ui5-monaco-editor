@@ -61,3 +61,6 @@ visual_ext_index.html
 # yarn
 
 *yarn*
+
+# mac
+.DS_Store
