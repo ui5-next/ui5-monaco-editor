@@ -84,6 +84,8 @@ export default class MonacoEditor extends Control {
     this._oEditorDomRef.style.height = "100%";
     this._oEditorDomRef.style.width = "100%";
 
+    this.setBusyIndicatorDelay(0);
+
   }
 
   onAfterRendering() {
@@ -116,6 +118,8 @@ export default class MonacoEditor extends Control {
    */
   _setupEditor() {
 
+    this.setBusy(true);
+
     window.require.config({ paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.17.0/min/vs' } });
 
     // load monaco editor
@@ -135,6 +139,8 @@ export default class MonacoEditor extends Control {
       this._oEditor.onDidBlurEditorText(this._onBlur.bind(this));
 
       this._loadTypes();
+
+      this.setBusy(false);
 
     });
 
