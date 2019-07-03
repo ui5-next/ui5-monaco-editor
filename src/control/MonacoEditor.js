@@ -17,6 +17,11 @@ export default class MonacoEditor extends Control {
         group: "Appearance",
         defaultValue: "javascript"
       },
+      theme: {
+        type: "string",
+        group: "Appearance",
+        defaultValue: ""
+      },
       types: {
         type: "any",
         defaultValue: [
@@ -68,11 +73,20 @@ export default class MonacoEditor extends Control {
         type: "boolean",
         group: "Behavior",
         defaultValue: true
+      },
+      requirejsSource: {
+        type: "string",
+        defaultValue: "https://cdn.bootcss.com/require.js/2.3.6/require.min.js"
+      },
+      monacoEditorSource: {
+        type: "string",
+        defaultValue: "https://cdn.bootcss.com/monaco-editor/0.17.0/min/vs"
       }
     },
     events: {
       liveChange: {},
-      change: {}
+      change: {},
+      save: {}
     }
   }
 
@@ -104,7 +118,7 @@ export default class MonacoEditor extends Control {
 
     if (!window.require) {
       // load requirejs
-      jQuery.sap.includeScript("https://cdn.bootcss.com/require.js/2.3.6/require.min.js", "requirejs", this._setupEditor.bind(this));
+      jQuery.sap.includeScript(this.getRequirejsSource(), "requirejs", this._setupEditor.bind(this));
     } else {
       this._setupEditor.bind(this)();
     }
@@ -114,29 +128,49 @@ export default class MonacoEditor extends Control {
   }
 
   /**
+   * get current editor option
+   */
+  _getEditorOption() {
+    return {
+      value: this.getValue(),
+      language: this.getType(),
+      readOnly: !this.getEditable(),
+      fontSize: this.getFontSize(),
+      theme: this.getTheme(),
+      automaticLayout: true,
+      wordWrap: "on",
+      minimap: { enabled: false } // disable minimap to increase performance
+    };
+  }
+
+  /**
    * setup editor with options
    */
   _setupEditor() {
 
     this.setBusy(true);
 
-    window.require.config({ paths: { 'vs': 'https://cdn.bootcss.com/monaco-editor/0.17.0/min/vs' } });
+    window.require.config({ paths: { 'vs': this.getMonacoEditorSource() } });
 
     // load monaco editor
     require(['vs/editor/editor.main'], monaco => {
 
-      this._oEditor = monaco.editor.create(this._oEditorDomRef, {
-        value: this.getValue(),
-        language: this.getType(),
-        readOnly: !this.getEditable(),
-        fontSize: this.getFontSize(),
-        automaticLayout: true,
-        minimap: { enabled: false } // disable minimap to increase performance
-      });
+      this._oEditor = monaco.editor.create(this._oEditorDomRef, this._getEditorOption());
 
       this._oEditor.getModel().onDidChangeContent(this._onEditorValueChange.bind(this));
 
       this._oEditor.onDidBlurEditorText(this._onBlur.bind(this));
+
+      this._oEditor.addAction({
+        id: "save",
+        label: "Save",
+        keybindings: [
+          monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S
+        ],
+        run: e => {
+          this.fireEvent("save", { e });
+        }
+      });
 
       this._loadTypes();
 
@@ -197,7 +231,6 @@ export default class MonacoEditor extends Control {
     var sCurrentValue = this.getValue();
 
     if (sValue != sCurrentValue) {
-      this.setProperty("value", sValue, true);
 
       this.fireLiveChange({
         value: sValue,
@@ -209,7 +242,7 @@ export default class MonacoEditor extends Control {
 
   setEditable(bEditable) {
     if (this._oEditor) {
-      this._oEditor.updateOptions({ readOnly: !bEditable });
+      this._oEditor.updateOptions(this._getEditorOption());
     }
     this.setProperty("editable", bEditable, true);
     return this;
@@ -217,7 +250,7 @@ export default class MonacoEditor extends Control {
 
   setType(sType) {
     if (this._oEditor) {
-      this._oEditor.updateOptions({ language: sType });
+      this._oEditor.updateOptions(this._getEditorOption());
     }
     this.setProperty("type", sType, true);
     return this;
