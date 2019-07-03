@@ -35,8 +35,6 @@
     "gulp-sourcemaps": "^2.6.0",
     "gulp-ui5-eager-preload": "^1.12.18",
     "http-proxy-middleware": "^0.19.1",
-    "loader-utils": "^1.1.0",
-    "merge-stream": "^1.0.1",
-    "run-sequence": "2.2.1"
+    "merge-stream": "^1.0.1"
   }
 }
